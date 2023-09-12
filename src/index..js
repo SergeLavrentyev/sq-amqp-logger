@@ -45,7 +45,7 @@ function _getTransport () {
     stand: _getConfigValue('logstash.stand'),
     project: _getConfigValue('logstash.project'),
     version: _getConfigValue('logstash.version') || 1,
-    amqp: _getConfigValue('logstash.amqp')
+    amqp: _getConfigValue('amqp')
   }
   const transportConfig = {
     type: 'raw',
