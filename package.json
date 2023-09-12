@@ -8,7 +8,8 @@
     "name": "s.lavrentyev"
   },
   "repository": {
-    "type": ""
+    "type": "git",
+    "url": "git@github.com:SergeLavrentyev/sq-amqp-logger.git"
   },
   "dependencies": {
     "amqplib": "^0.10.3",
