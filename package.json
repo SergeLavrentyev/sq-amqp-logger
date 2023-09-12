@@ -1,0 +1,23 @@
+{
+  "name": "sq-amqp-logger",
+  "version": "1.0.0",
+  "description": "SQ amqp logger",
+  "main": "src/index.js",
+  "license": "MIT",
+  "author": {
+    "name": "s.lavrentyev"
+  },
+  "repository": {
+    "type": ""
+  },
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "bunyan": "^1.8.15",
+    "config": "^3.3.9",
+    "uuid": "^9.0.0"
+  },
+  "files": [
+    "src/amqp",
+    "src"
+  ]
+}
