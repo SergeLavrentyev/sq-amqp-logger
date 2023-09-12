@@ -3,6 +3,11 @@ const bunyan = require('bunyan')
 const bunyanLogstashUdp = require('./amqp/logstash')
 const config = require('config')
 
+/**
+ * @param config
+ * @return {boolean}
+ * @private
+ */
 function _isValidLogstashConfig (config) {
   if (!config) {
     console.error('Logstash config is not defined')
@@ -26,6 +31,7 @@ function _isValidLogstashConfig (config) {
 
 /**
  * @param {String} path
+ * @return {String|boolean}
  * @private
  */
 function _getConfigValue(path) {
@@ -33,20 +39,23 @@ function _getConfigValue(path) {
     return config.get(path)
   }
 
-  return null;
+  return false;
 }
 
+/**
+ * @return {Object}
+ * @private
+ */
 function _getTransport () {
   const streamConfig = {
     server: _getConfigValue('logstash.server') || '',
-    host: _getConfigValue('logstash.host'),
-    port: _getConfigValue('logstash.port'),
-    appName: _getConfigValue('logstash.application'),
+    app: _getConfigValue('logstash.application'),
     stand: _getConfigValue('logstash.stand'),
     project: _getConfigValue('logstash.project'),
     version: _getConfigValue('logstash.version') || 1,
     amqp: _getConfigValue('amqp')
   }
+
   const transportConfig = {
     type: 'raw',
     reemitErrorEvents: true
@@ -55,7 +64,7 @@ function _getTransport () {
   Object.assign(transportConfig, {
     stream: bunyanLogstashUdp.createStream(streamConfig)
   })
-  console.log(`Bunyan transport - udp`)
+  console.log(`Logger transport - amqp`)
 
   return transportConfig
 }
@@ -64,7 +73,7 @@ let logger = console
 
 if (_isValidLogstashConfig(config.logstash)) {
   const loggerConfig = {
-    name: config.logstash.application,
+    name: _getConfigValue('logstash.application'),
     streams: [
       {
         stream: process.stdout

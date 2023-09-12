@@ -19,7 +19,7 @@ const LEVELS = {
  * @property {String|Number} [port]
  * @property {String} [username]
  * @property {String} [password]
- * @property {String} [queue]
+ * @property {String} [logQueue]
  */
 
 /**
@@ -28,7 +28,7 @@ const LEVELS = {
  * @property {String} [server]
  * @property {String} [host]
  * @property {String|Number} [port]
- * @property {String} [appName]
+ * @property {String} [app]
  * @property {String|Number} [pid]
  * @property {String} [type]
  * @property {String} [stand]
@@ -44,9 +44,7 @@ class LogstashStream {
     this.name = 'bunyan'
     this.level = options.level || 'info'
     this.server = options.server || os.hostname()
-    this.host = options.host || '127.0.0.1'
-    this.port = options.port || 9999
-    this.application = options.appName || process.title
+    this.application = options.app || process.title
     this.pid = options.pid || process.pid
     this.type = options.type
     this.stand = options.stand || ''
@@ -55,14 +53,18 @@ class LogstashStream {
     this.amqpPort = options.amqp.port || 5672
     this.amqpUsername = options.amqp.username || 'rabbitmq'
     this.amqpPassword = options.amqp.password || 'rabbitmq'
-    this.amqpQueue = options.amqp.queue || 'elk'
+    this.amqpQueue = options.amqp.logQueue || 'elk'
   }
 
+  /**
+   *
+   * @param {Object|String} entry
+   * @return {{"@timestamp": string, level: (*|string|number|String), project: (*|String|string), pid: string, source: string, message: *, stand: (*|String|string), type: String}}
+   */
   generateMessageObject(entry) {
     if (typeof (entry) === 'string') {
       entry = JSON.parse(entry)
     }
-  console.log('Entry ')
     let preparedOriginalMessageObject = clone(entry, 0)
     delete preparedOriginalMessageObject.time
     delete preparedOriginalMessageObject.msg
@@ -85,15 +87,24 @@ class LogstashStream {
     }
   }
 
+  /**
+   * @return {string}
+   */
   getHost() {
     return `amqp://${this.amqpUsername}:${this.amqpPassword}@${this.amqpHostname}:${this.amqpPort}`
   }
 
+  /**
+   * @param {string|Object} entry
+   */
   write(entry) {
     const messageObject = this.generateMessageObject(entry)
     this.send(JSON.stringify(messageObject, bunyan.safeCycles()))
   }
 
+  /**
+   * @param {String} message
+   */
   send(message) {
     const self = this
     const buf = new Buffer.from(message)
@@ -122,6 +133,10 @@ class LogstashStream {
   }
 }
 
+/**
+ * @param options
+ * @return {LogstashStream}
+ */
 function createLogstashStream(options) {
   return new LogstashStream(options)
 }
