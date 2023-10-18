@@ -111,24 +111,30 @@ class LogstashStream {
     const messageId = Date.now() + uuid.v4();
     const url = this.getHost()
 
-    amqplib.connect(url, function (err, conn) {
-      if (err) {
-        console.log("bunyan-logstash socket connection error: " + err)
-        throw err
-      }
+    amqplib.connect(url, (err, conn) => {
+      if (err) return bail(err)
+      conn.createChannel((err, ch) => {
+        if (err) return bail(err, conn)
+        ch.assertQueue(self.amqpQueue, {durable: true}, (err) => {
+          if (err) return bail(err, conn)
+          ch.sendToQueue(self.amqpQueue, buf, {persistent: true, messageId})
+          console.log(" [x] Sent %s", message);
 
-      conn.createChannel(function (err1, ch) {
-        if (err1) {
-          throw err1
-        }
-
-        ch.assertQueue(self.amqpQueue, {durable: true})
-        ch.sendToQueue(self.amqpQueue, buf, {persistent: true, messageId})
-        console.log(" [x] Sent %s", message);
+          setTimeout(function () {
+            ch.close(() => {
+              conn.close();
+            })
+          }, 500);
+        })
       })
-      setTimeout(function () {
-        conn.close();
-      }, 500);
+
+      function bail(err, conn) {
+        console.error(err)
+
+        if (conn) conn.close(() => {
+          console.log('Connection closed on error/')
+        })
+      }
     })
   }
 }

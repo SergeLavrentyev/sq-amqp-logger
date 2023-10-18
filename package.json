@@ -1,6 +1,6 @@
 {
   "name": "sq-amqp-logger",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "SQ amqp logger",
   "main": "src/index.js",
   "license": "MIT",
