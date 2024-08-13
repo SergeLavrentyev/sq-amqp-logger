@@ -22,7 +22,7 @@ function _isValidLogstashConfig (config) {
   }
 
   if (missingFields.length > 0) {
-    console.error('Missing required fields for logstash config - ', missingFields.split(', '))
+    console.error('Missing required fields for logstash config - ', missingFields.join(', '))
     return false
   } else {
     return true
